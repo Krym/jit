@@ -146,6 +146,18 @@ tests_model = {
         }
     ],
 
+    'InfoHypertree': [
+        {
+            'Title': 'Infones hypertree animation',
+            'Description':
+            """
+            Static JSON tree structure is used as input for this animation.
+            """,
+            'Extras': ['excanvas.js'],
+            'Example': True
+        }
+    ],
+
     
     'Hypertree': [
         {

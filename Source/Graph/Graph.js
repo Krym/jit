@@ -1065,6 +1065,29 @@ Graph.Util = {
         }
     },
 
+    computeCurrentDepth: function(graph, id, startDepth, flags) {
+        startDepth = startDepth || 0;
+        var filter = this.filter(flags);
+        this.eachNode(graph, function(elem) {
+            elem._flag = false;
+            elem._currentDepth = -1;
+        }, flags);
+        var root = graph.getNode(id);
+        root._currentDepth = startDepth;
+        var queue = [root];
+        while(queue.length != 0) {
+            var node = queue.pop();
+            node._flag = true;
+            this.eachAdjacency(node, function(adj) {
+                var n = adj.nodeTo;
+                if(n._flag == false && filter(n) && !adj._hiding) {
+                    if(n._currentDepth < 0) n._currentDepth = node._currentDepth + 1 + startDepth;
+                    queue.unshift(n);
+                }
+            }, flags);
+        }
+    },
+
     /*
        Method: eachBFS
     
@@ -1398,7 +1421,7 @@ Graph.Util = {
 };
 
 //Append graph methods to <Graph>
-$.each(['get', 'getNode', 'each', 'eachNode', 'computeLevels', 'eachBFS', 'clean', 'getClosestNodeToPos', 'getClosestNodeToOrigin'], function(m) {
+$.each(['get', 'getNode', 'each', 'eachNode', 'computeLevels', 'computeCurrentDepth', 'eachBFS', 'clean', 'getClosestNodeToPos', 'getClosestNodeToOrigin'], function(m) {
   Graph.prototype[m] = function() {
     return Graph.Util[m].apply(Graph.Util, [this].concat(Array.prototype.slice.call(arguments)));
   };

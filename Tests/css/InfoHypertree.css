@@ -1,0 +1,27 @@
+#center-container {
+    background-color: transparent;
+}
+
+.node {
+    font-family: 'Arial';
+    font-size: 11px;
+    cursor: pointer;
+    color: #ddddff;
+    background-color: #ccc;
+    padding: 2px 10px;
+    border: 1px solid #333;
+    max-width: 112px;
+    border-radius: 4px;
+
+    -webkit-user-select: none;  
+    -moz-user-select: none;    
+    -ms-user-select: none;      
+    user-select: none;
+}
+
+.node.selected {
+    font-weight: bold;
+    font-size: 11px;
+    background-color: #000000;
+
+}
