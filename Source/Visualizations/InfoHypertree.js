@@ -9,14 +9,14 @@ Complex.prototype.moebiusTransformation = function(c) {
   return num.$div(den);
 };
 
-// Graph.Util.moebiusTransformation = function(graph, pos, prop, startPos, flags) {
-//   this.eachNode(graph, function(elem) {
-//     for ( var i = 0; i < prop.length; i++) {
-//       var p = pos[i].scale(-1), property = startPos ? startPos : prop[i];
-//       elem.getPos(prop[i]).set(elem.getPos(property).getc().moebiusTransformation(p));
-//     }
-//   }, flags);
-// };
+Graph.Util.moebiusTransformation = function(graph, pos, prop, startPos, flags) {
+  this.eachNode(graph, function(elem) {
+    for ( var i = 0; i < prop.length; i++) {
+      var p = pos[i].scale(-1), property = startPos ? startPos : prop[i];
+      elem.getPos(prop[i]).set(elem.getPos(property).getc().moebiusTransformation(p));
+    }
+  }, flags);
+};
 
 $jit.InfoHypertree = new Class( {
     Implements: [ Loader, Extras, Layouts.Radial ],
@@ -83,6 +83,18 @@ $jit.InfoHypertree = new Class( {
         this.plot();
     },
 
+    reposition: function() {
+        this.compute('end');
+        var vector = this.graph.getNode(this.root).pos.getc().scale(-1);
+        Graph.Util.moebiusTransformation(this.graph, [ vector ], [ 'end' ], 'end', "ignore");
+        this.graph.eachNode(function(node) {
+            if (node.ignore) {
+                node.endPos.rho = node.pos.rho;
+                node.endPos.theta = node.pos.theta;
+            }
+        });
+    },
+
     createLevelDistanceFunc: function() {
         // get max viz. length.
         var r = this.getRadius();
@@ -122,14 +134,6 @@ $jit.InfoHypertree = new Class( {
         });
 
         onComplete();
-    },
-
-    contractNodes: function() {
-        //get nodes to hide
-    },
-
-    moveNodes: function() {
-        //center graph
     },
 
     expandNodes: function() {
@@ -184,10 +188,27 @@ $jit.InfoHypertree = new Class( {
                 onComplete: function() {
                     that.busy = false;
                     opt.onComplete();
+                    that.contractNodes();
                 }
             }), versor);
         }
-    }
+    },
+
+    contractNodes: function() {
+        var map = [];
+
+        this.graph.eachNode(function(node){
+            if (node._currentDepth > 3) {
+                map.push(node.id);
+            }
+        });
+
+        this.op.removeNode(map.reverse(), {
+            type: 'fade:con',
+            duration: 500,
+            hideLabels: false
+        });
+    },
 });
 
 $jit.InfoHypertree.$extend = true;
