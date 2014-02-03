@@ -105,7 +105,7 @@ Graph.Op = {
                 }
                 viz.reposition();
                 viz.fx.animate($.merge(options, {
-                    modes: ['node-property:alpha'],
+                    modes: ['node-property:alpha', 'linear'],
                     onComplete: function() {
                         that.removeNode(n, { type: 'nothing' });
                         options.onComplete && options.onComplete();
