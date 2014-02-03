@@ -17,11 +17,17 @@
     -moz-user-select: none;    
     -ms-user-select: none;      
     user-select: none;
+
+    -webkit-transition: font-size 200ms;
+}
+
+.node:hover {
+    z-index: 1000;
+    color: #fff;
+    font-size: 13px;
 }
 
 .node.selected {
     font-weight: bold;
-    font-size: 11px;
     background-color: #000000;
-
 }

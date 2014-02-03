@@ -136,10 +136,6 @@ $jit.InfoHypertree = new Class( {
         onComplete();
     },
 
-    expandNodes: function() {
-        //expand requested nodes
-    },
-
     selectPath: function(node) {
         var that = this;
         this.graph.eachNode(function(n) { n.selected = false; });
@@ -167,12 +163,12 @@ $jit.InfoHypertree = new Class( {
     onClick: function(id, opt) {
         var node = this.graph.getNode(id);
         this.selectPath(node);
-        var pos = node.pos.getc(true);
-        this.move(pos, opt);
+        this.move(node, opt);
     },
 
-    move: function(pos, opt) {
-        var versor = $C(pos.x, pos.y);
+    move: function(node, opt) {
+        var pos = node.pos.getc(true),
+            versor = $C(pos.x, pos.y);
         if (this.busy === false && versor.norm() < 1) {
             this.busy = true;
             var root = this.graph.getClosestNodeToPos(versor), that = this;
@@ -183,32 +179,46 @@ $jit.InfoHypertree = new Class( {
             }, opt || {});
             this.fx.animate($.merge( {
                 modes: ['moebius'],
+                duration: 500,
                 hideLabels: true
             }, opt, {
                 onComplete: function() {
                     that.busy = false;
-                    opt.onComplete();
-                    that.contractNodes();
+                    that.contractNodes(node, opt);
+                    that.expandNodes(node, opt);
                 }
             }), versor);
         }
     },
 
-    contractNodes: function() {
-        var map = [];
+    contractNodes: function(node, opt) {
+        var that = this;
 
-        this.graph.eachNode(function(node){
-            if (node._currentDepth > 3) {
-                map.push(node.id);
+        this.graph.eachNode(function(n){
+            if (n._currentDepth > 2) {
+                that.op.contract(n, {
+                    type: 'animate',
+                    duration: 500,
+                    hideLabels: false
+                })
             }
         });
-
-        this.op.removeNode(map.reverse(), {
-            type: 'fade:con',
-            duration: 500,
-            hideLabels: false
-        });
+        
     },
+
+    expandNodes: function(node, opt) {
+        var that = this;
+
+        this.graph.eachNode(function(n){
+            if (n._currentDepth <= 2) {
+                that.op.expand(n, {
+                    type: 'animate',
+                    duration: 500,
+                    hideLabels: false
+                })
+            }
+        });
+    }
 });
 
 $jit.InfoHypertree.$extend = true;

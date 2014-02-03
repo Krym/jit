@@ -122,6 +122,24 @@ Graph.Op = {
                     duration: Math.ceil(options.duration / n.length)
                 });
                 break;
+
+            case 'smooth': 
+                that = this;
+                //set alpha to 0 for nodes to remove.
+                for(i=0; i<n.length; i++) {
+                    nodeObj = viz.graph.getNode(n[i]);
+                    nodeObj.setData('alpha', 0, 'end');
+                }
+                viz.fx.animate($.merge(options, {
+                    modes: ['node-property:alpha'],
+                    onComplete: function() {
+                        that.removeNode(n, { type: 'nothing' });
+                        viz.labels.clearLabels();
+                        viz.reposition();
+                        options.onComplete && options.onComplete();
+                    }
+                }));
+              break;
                 
             default: this.doError();
         }
@@ -318,6 +336,25 @@ Graph.Op = {
                         modes: ['linear'].concat(modes)
                     }));
                 }
+                break;
+
+            case 'smooth':
+                var that = this,
+                    graph = viz.construct(json);
+
+                //set alpha to 0 for nodes to add.
+                var fadeEdges = this.preprocessSum(graph),
+                    modes = !fadeEdges? ['node-property:alpha'] : ['node-property:alpha', 'edge-property:alpha'];
+                viz.reposition();
+                viz.graph.eachNode(function(elem) {
+                    if (elem.id != root && elem.pos.isZero()) {
+                      elem.pos.set(elem.endPos); 
+                      elem.startPos.set(elem.endPos);
+                    }
+                });
+                viz.fx.animate($.merge(options, {
+                    modes: ['linear'].concat(modes)
+                }));
                 break;
 
             default: this.doError();
@@ -537,8 +574,8 @@ Graph.Op = {
                 if (adj._reversing) {
                     var from = adj.nodeFrom.id;
                     var to = adj.nodeTo.id;
-//
-//                    // swap instead of adding and removing
+
+                   // swap instead of adding and removing
                     var edge1 = graph.edges[from][to];
                     var edge2 = graph.edges[to][from];
 
@@ -580,11 +617,12 @@ Graph.Op = {
       var viz = this.viz;
       if(node.collapsed || !node.anySubnode($.lambda(true))) return;
       opt = $.merge(this.options, viz.config, opt || {}, {
-        'modes': ['node-property:alpha:span', 'linear']
+        'modes': ['node-property:alpha:span']
       });
       node.collapsed = true;
       (function subn(n) {
         n.eachSubnode(function(ch) {
+          if (ch.selected) return;
           ch.ignore = true;
           ch.setData('alpha', 0, opt.type == 'animate'? 'end' : 'current');
           subn(ch);
@@ -638,14 +676,14 @@ Graph.Op = {
       if(!('collapsed' in node)) return;
       var viz = this.viz;
       opt = $.merge(this.options, viz.config, opt || {}, {
-        'modes': ['node-property:alpha:span', 'linear']
+        'modes': ['node-property:alpha:span']
       });
       delete node.collapsed;
       (function subn(n) {
         n.eachSubnode(function(ch) {
           delete ch.ignore;
           ch.setData('alpha', 1, opt.type == 'animate'? 'end' : 'current');
-          subn(ch);
+          //subn(ch);
         });
       })(node);
       if(opt.type == 'animate') {

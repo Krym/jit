@@ -241,6 +241,21 @@ function init() {
         }]
     };
 
+    var addJson = function(id){
+        var childs = Math.round(Math.random()*4) + 1;
+        var response = []
+        for (var i=1; i <= childs; i++) {
+            var gid = "" + Math.floor(Math.random()*100) + "-" + Math.floor(Math.random()*100) + "-" + Math.floor(Math.random()*100) + "-" + Math.floor(Math.random()*100);
+            response.push({
+                adjacencies: [id],
+                name: gid,
+                id: gid,
+                data: {}
+            });
+        }
+        return response;
+    }
+
     var infovis = document.getElementById('infovis');
     var w = infovis.offsetWidth - 50, h = infovis.offsetHeight - 50;
 
@@ -265,7 +280,8 @@ function init() {
 
         onCreateLabel: function(label, node) {
             label.id = node.id; 
-            var $el = $(label);
+            var that = this,
+                $el = $(label);
             node.$label = $el;
             $el.text(node.name);
             $el.css('visibility', 'hidden');
@@ -283,6 +299,18 @@ function init() {
                 iht.onClick(node.id, {
                     hideLabels: false,
                     onComplete: function() {
+                        // var subnodes = node.getSubnodes([1,1]);
+                        // subnodes.forEach(function(n) {
+                        //     if (n.getSubnodes(1).length < 1) {
+                        //         var sum = addJson(n.id);
+                            
+                        //         iht.op.sum(sum, {
+                        //             type: 'smooth',
+                        //             duration: 500,
+                        //             hideLabels: false
+                        //         });
+                        //     }
+                        // });
                         iht.controller.onComplete();
                     }
                 });
