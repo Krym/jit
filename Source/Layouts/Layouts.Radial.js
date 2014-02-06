@@ -23,7 +23,11 @@ Layouts.Radial = new Class({
    */
   compute : function(property) {
     var prop = $.splat(property || [ 'current', 'start', 'end' ]);
+    var node = this.graph.getNode(this.root);
     NodeDim.compute(this.graph, prop, this.config);
+    if (!("_originalDepth" in node)) {
+        this.graph.computeOriginalDepth(this.root, 0, "ignore");
+    }
     this.graph.computeLevels(this.root, 0, "ignore");
     var lengthFunc = this.createLevelDistanceFunc(); 
     this.computeAngularWidths(prop);
@@ -57,9 +61,11 @@ Layouts.Radial = new Class({
       var angleSpan = elem.angleSpan.end - elem.angleSpan.begin;
       var angleInit = elem.angleSpan.begin;
       var len = getLength(elem);
+      
       //Calculate the sum of all angular widths
       var totalAngularWidths = 0, subnodes = [], maxDim = {};
       elem.eachSubnode(function(sib) {
+        //if (elem.name == "User") console.log(sib.name, sib._treeAngularWidth);
         totalAngularWidths += sib._treeAngularWidth;
         //get max dim
         for ( var i=0, l=propArray.length; i < l; i++) {
@@ -68,6 +74,7 @@ Layouts.Radial = new Class({
         }
         subnodes.push(sib);
       }, "ignore");
+      // console.log(elem.name, len, totalAngularWidths, elem.angleSpan);
       //Maintain children order
       //Second constraint for <http://bailando.sims.berkeley.edu/papers/infovis01.htm>
       if (parent && parent.id == elem.id && subnodes.length > 0
@@ -85,6 +92,9 @@ Layouts.Radial = new Class({
 
           for ( var i=0, l=propArray.length; i < l; i++) {
             var pi = propArray[i];
+            if (child.name == "Germany") {
+             // console.log(child.name, len, pi);
+            }
             child.setPos($P(theta, len), pi);
             child.setData('span', angleProportion, pi);
             child.setData('dim-quotient', child.getData('dim', pi) / maxDim[pi], pi);
@@ -108,6 +118,7 @@ Layouts.Radial = new Class({
   setAngularWidthForNodes : function(prop) {
     this.graph.eachBFS(this.root, function(elem, i) {
       var diamValue = elem.getData('angularWidth', prop[0]) || 5;
+      // console.log(elem.name, diamValue/i);
       elem._angularWidth = diamValue / i;
     }, "ignore");
   },
@@ -135,6 +146,7 @@ Layouts.Radial = new Class({
       that.setSubtreeAngularWidth(child);
       sumAW += child._treeAngularWidth;
     }, "ignore");
+    // console.log(elem.name, Math.max(nodeAW, sumAW));
     elem._treeAngularWidth = Math.max(nodeAW, sumAW);
   },
 

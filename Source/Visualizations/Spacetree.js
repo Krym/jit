@@ -356,6 +356,7 @@ $jit.ST= (function() {
           var that = this;
           this.graph.eachNode(function(n) { n.selected = false; });
           function path(node) {
+            console.log(node);
               if(node == null || node.selected) return;
               node.selected = true;
               $.each(that.group.getSiblings([node])[node.id],

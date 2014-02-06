@@ -23,9 +23,13 @@ var NodeDim = {
   label: null,
   
   compute: function(graph, prop, opt) {
+  
     this.initializeLabel(opt);
     var label = this.label, style = label.style;
     graph.eachNode(function(n) {
+      //TODO(nico) should let the user choose what to insert here.
+
+        label.innerHTML = n.name;
       var autoWidth  = n.getData('autoWidth'),
           autoHeight = n.getData('autoHeight');
       if(autoWidth || autoHeight) {
@@ -40,9 +44,6 @@ var NodeDim = {
         //reset label dimensions
         style.width  = autoWidth? 'auto' : width + 'px';
         style.height = autoHeight? 'auto' : height + 'px';
-        
-        //TODO(nico) should let the user choose what to insert here.
-        label.innerHTML = n.name;
         
         var offsetWidth  = label.offsetWidth,
             offsetHeight = label.offsetHeight;
@@ -70,7 +71,7 @@ var NodeDim = {
   
   setLabelStyles: function(opt) {
     $.extend(this.label.style, {
-      'visibility': 'hidden',
+//      'visibility': 'hidden',
       'position': 'absolute',
       'width': 'auto',
       'height': 'auto'

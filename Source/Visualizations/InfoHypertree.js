@@ -86,7 +86,7 @@ $jit.InfoHypertree = new Class( {
     reposition: function() {
         this.compute('end');
         var vector = this.graph.getNode(this.root).pos.getc().scale(-1);
-        Graph.Util.moebiusTransformation(this.graph, [ vector ], [ 'end' ], 'end', "ignore");
+        //Graph.Util.moebiusTransformation(this.graph, [ vector ], [ 'end' ], 'end', "ignore");
         this.graph.eachNode(function(node) {
             if (node.ignore) {
                 node.endPos.rho = node.pos.rho;
@@ -95,6 +95,7 @@ $jit.InfoHypertree = new Class( {
         });
     },
 
+    // computes distance of from center (rho)
     createLevelDistanceFunc: function() {
         // get max viz. length.
         var r = this.getRadius();
@@ -113,6 +114,9 @@ $jit.InfoHypertree = new Class( {
                 while (d) {
                     acum += pow(a, d--);
                 }
+                // if (node.name == "Brno"){
+                //     console.log(acum - config.offset);
+                // }
                 return acum - config.offset;
             };
         };
@@ -162,7 +166,6 @@ $jit.InfoHypertree = new Class( {
 
     onClick: function(id, opt) {
         var node = this.graph.getNode(id);
-        this.selectPath(node);
         this.move(node, opt);
     },
 
@@ -171,8 +174,10 @@ $jit.InfoHypertree = new Class( {
             versor = $C(pos.x, pos.y);
         if (this.busy === false && versor.norm() < 1) {
             this.busy = true;
+            this.selectPath(node);
             var root = this.graph.getClosestNodeToPos(versor), that = this;
-            this.graph.computeCurrentDepth(root.id, 0);
+            this.root = root.id;
+            this.graph.computeLevels(root.id, 0);
             this.controller.onBeforeCompute(root);
             opt = $.merge( {
                 onComplete: $.empty
@@ -183,9 +188,12 @@ $jit.InfoHypertree = new Class( {
                 hideLabels: true
             }, opt, {
                 onComplete: function() {
-                    that.busy = false;
                     that.contractNodes(node, opt);
                     that.expandNodes(node, opt);
+                    setTimeout(function() {
+                        that.busy = false;
+                        opt.onComplete();
+                    }, 550);
                 }
             }), versor);
         }
@@ -195,11 +203,16 @@ $jit.InfoHypertree = new Class( {
         var that = this;
 
         this.graph.eachNode(function(n){
-            if (n._currentDepth > 2) {
+            if (n._depth > 2) {
                 that.op.contract(n, {
                     type: 'animate',
                     duration: 500,
-                    hideLabels: false
+                    hideLabels: false,
+                    onComplete: function() {
+                        that.fx.animate({
+                            modes: ['linear']
+                        });
+                    }
                 })
             }
         });
@@ -210,11 +223,16 @@ $jit.InfoHypertree = new Class( {
         var that = this;
 
         this.graph.eachNode(function(n){
-            if (n._currentDepth <= 2) {
+            if (n._depth <= 2) {
                 that.op.expand(n, {
                     type: 'animate',
                     duration: 500,
-                    hideLabels: false
+                    hideLabels: false,
+                    onComplete: function() {
+                        that.fx.animate({
+                            modes: ['linear']
+                        });
+                    }
                 })
             }
         });
@@ -268,108 +286,6 @@ $jit.InfoHypertree.$extend = true;
         'none': {
             'render': $.empty,
             'contains': $.lambda(false)
-        },
-        'circle': {
-            'render': function(node, canvas) {
-                var nconfig = this.node,
-                dim = node.getData('dim'),
-                p = node.pos.getc();
-                dim = nconfig.transform? dim * (1 - p.squaredNorm()) : dim;
-                p.$scale(node.scale);
-                if (dim > 0.2) {
-                    this.nodeHelper.circle.render('fill', p, dim, canvas);
-                }
-            },
-            'contains': function(node, pos) {
-                var dim = node.getData('dim'),
-                npos = node.pos.getc().$scale(node.scale);
-                return this.nodeHelper.circle.contains(npos, pos, dim);
-            }
-        },
-        'ellipse': {
-            'render': function(node, canvas) {
-                var pos = node.pos.getc().$scale(node.scale),
-                width = node.getData('width'),
-                height = node.getData('height');
-                this.nodeHelper.ellipse.render('fill', pos, width, height, canvas);
-            },
-            'contains': function(node, pos) {
-                var width = node.getData('width'),
-                height = node.getData('height'),
-                npos = node.pos.getc().$scale(node.scale);
-                return this.nodeHelper.circle.contains(npos, pos, width, height);
-            }
-        },
-        'square': {
-            'render': function(node, canvas) {
-                var nconfig = this.node,
-                dim = node.getData('dim'),
-                p = node.pos.getc();
-                dim = nconfig.transform? dim * (1 - p.squaredNorm()) : dim;
-                p.$scale(node.scale);
-                if (dim > 0.2) {
-                    this.nodeHelper.square.render('fill', p, dim, canvas);
-                }
-            },
-            'contains': function(node, pos) {
-                var dim = node.getData('dim'),
-                npos = node.pos.getc().$scale(node.scale);
-                return this.nodeHelper.square.contains(npos, pos, dim);
-            }
-        },
-        'rectangle': {
-            'render': function(node, canvas) {
-                var nconfig = this.node,
-                width = node.getData('width'),
-                height = node.getData('height'),
-                pos = node.pos.getc();
-                width = nconfig.transform? width * (1 - pos.squaredNorm()) : width;
-                height = nconfig.transform? height * (1 - pos.squaredNorm()) : height;
-                pos.$scale(node.scale);
-                if (width > 0.2 && height > 0.2) {
-                    this.nodeHelper.rectangle.render('fill', pos, width, height, canvas);
-                }
-            },
-            'contains': function(node, pos) {
-                var width = node.getData('width'),
-                height = node.getData('height'),
-                npos = node.pos.getc().$scale(node.scale);
-                return this.nodeHelper.rectangle.contains(npos, pos, width, height);
-            }
-        },
-        'triangle': {
-            'render': function(node, canvas) {
-                var nconfig = this.node,
-                dim = node.getData('dim'),
-                p = node.pos.getc();
-                dim = nconfig.transform? dim * (1 - p.squaredNorm()) : dim;
-                p.$scale(node.scale);
-                if (dim > 0.2) {
-                    this.nodeHelper.triangle.render('fill', p, dim, canvas);
-                }
-            },
-            'contains': function(node, pos) {
-                var dim = node.getData('dim'),
-                npos = node.pos.getc().$scale(node.scale);
-                return this.nodeHelper.triangle.contains(npos, pos, dim);
-            }
-        },
-        'star': {
-            'render': function(node, canvas) {
-                var nconfig = this.node,
-                dim = node.getData('dim'),
-                p = node.pos.getc();
-                dim = nconfig.transform? dim * (1 - p.squaredNorm()) : dim;
-                p.$scale(node.scale);
-                if (dim > 0.2) {
-                    this.nodeHelper.star.render('fill', p, dim, canvas);
-                }
-            },
-            'contains': function(node, pos) {
-                var dim = node.getData('dim'),
-                npos = node.pos.getc().$scale(node.scale);
-                return this.nodeHelper.star.contains(npos, pos, dim);
-            }
         }
     });
 

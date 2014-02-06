@@ -197,9 +197,11 @@ Graph.Label.DOM = new Class({
     hideLabels: function (hide) {
       var container = this.getLabelContainer();
       if(hide)
-        container.style.display = 'none';
+        //container.style.display = 'none';
+      container.className = 'hidetext';
       else
-        container.style.display = '';
+        container.className = '';
+        //container.style.display = '';
       this.labelsHidden = hide;
     },
 
@@ -347,11 +349,18 @@ Graph.Label.HTML = new Class({
       if(!tag && !(tag = document.getElementById(id))) {
         tag = document.createElement('div');
         var container = this.getLabelContainer();
+        tag.innerHTML = node.name;
         tag.id = id;
         tag.className = 'node';
         tag.style.position = 'absolute';
         controller.onCreateLabel(tag, node);
         container.appendChild(tag);
+        var w = tag.offsetWidth,
+          h = tag.offsetHeight;
+        tag.style.marginTop =   '-' + h/2 + 'px';
+        tag.style.marginLeft =  '-' + w/2 + 'px';
+       // tag.style.visibility = 'visible';
+
         this.labels[node.id] = tag;
       }
 

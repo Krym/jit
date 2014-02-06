@@ -241,6 +241,20 @@ function init() {
         }]
     };
 
+    var bgcolors = [
+        "#f89406", 
+        "#468847",
+        "#b94a48",
+        "#3a87ad",
+        "#555555",
+        "#123456",
+        "#654321",
+        "#3399ff",
+        "#abcdef",
+        "#fedcba",
+        "#999999"
+    ];
+
     var addJson = function(id){
         var childs = Math.round(Math.random()*4) + 1;
         var response = []
@@ -275,7 +289,7 @@ function init() {
             overridable: true,
             lineWidth: 1.5,
             dim: 100,
-            color: "#aaaaaa"
+            color: "#dddddd"
         },
 
         onCreateLabel: function(label, node) {
@@ -283,14 +297,10 @@ function init() {
             var that = this,
                 $el = $(label);
             node.$label = $el;
-            $el.text(node.name);
-            $el.css('visibility', 'hidden');
-            $el.data('placed', false);
 
-            var color = 18 * (node._depth+1);
-            var bg = '#'+'55'+''+color+''+color;
-            $el.css('background-color', bg);
+            var bgcolor = bgcolors[node._originalDepth] || bgcolors[node._originalDepth % bgcolors.length];
 
+            $el.css('background-color', bgcolor);
             
             $jit.util.addEvent(label, 'click', function () {
 
@@ -299,35 +309,29 @@ function init() {
                 iht.onClick(node.id, {
                     hideLabels: false,
                     onComplete: function() {
-                        // var subnodes = node.getSubnodes([1,1]);
-                        // subnodes.forEach(function(n) {
-                        //     if (n.getSubnodes(1).length < 1) {
-                        //         var sum = addJson(n.id);
-                            
-                        //         iht.op.sum(sum, {
-                        //             type: 'smooth',
-                        //             duration: 500,
-                        //             hideLabels: false
-                        //         });
-                        //     }
-                        // });
+                        var subnodes = node.getSubnodes(1);
+                        subnodes.forEach(function(n) {
+
+                            if (n.getSubnodes(1).length < 1 && n._depth <= 2) {
+                                var sum = addJson(n.id);
+                                iht.op.sum(sum, {
+                                    type: 'smooth',
+                                    duration: 500,
+                                    hideLabels: false,
+                                    depth: n._originalDepth
+                                });
+
+                            }
+                        });
                         iht.controller.onComplete();
                     }
                 });
 
             });
-        },
 
-        onPlaceLabel: function(label, node) {
-            var $el = $(label);
-            // on first place of each label, update it's position using margin
-            if (!$el.data().placed) {
-                $el.css({
-                    'margin-top': '-' + ($el.height()/2 + parseInt($el.css('padding-top'))) + 'px',
-                    'margin-left': '-' + ($el.width()/2 + parseInt($el.css('padding-left'))) + 'px',
-                    'visibility': 'visible'
-                }).data('placed', true)
-            }
+            // $jit.util.addEvent(label, 'mouseover', function() {
+            //     console.log(node);
+            // })
         },
 
         onBeforePlotNode: function(node) {
@@ -342,7 +346,7 @@ function init() {
 
         onBeforePlotLine: function(adj){
             if (adj.nodeFrom.selected && adj.nodeTo.selected) {
-                adj.data.$color = "#666";
+                adj.data.$color = "#aaa";
                 adj.data.$lineWidth = 3;
             }
             else {

@@ -341,19 +341,23 @@ Graph.Op = {
             case 'smooth':
                 var that = this,
                     graph = viz.construct(json);
-
+                    
                 //set alpha to 0 for nodes to add.
                 var fadeEdges = this.preprocessSum(graph),
                     modes = !fadeEdges? ['node-property:alpha'] : ['node-property:alpha', 'edge-property:alpha'];
+                // call computeLevels for this subtree
+                viz.graph.computeOriginalDepth(json[0].adjacencies[0], options.depth, "ignore");
                 viz.reposition();
-                viz.graph.eachNode(function(elem) {
-                    if (elem.id != root && elem.pos.isZero()) {
-                      elem.pos.set(elem.endPos); 
-                      elem.startPos.set(elem.endPos);
-                    }
-                });
                 viz.fx.animate($.merge(options, {
-                    modes: ['linear'].concat(modes)
+                    modes: ['linear'],
+                    onComplete: function() {
+                        viz.fx.animate($.merge(options, {
+                            modes: modes,
+                            onComplete: function() {
+                                options.onComplete();
+                            }
+                        }));
+                    }
                 }));
                 break;
 

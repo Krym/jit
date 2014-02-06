@@ -1,17 +1,35 @@
 #center-container {
-    background-color: transparent;
+    background: #f9f9f9;
+    background: -moz-radial-gradient(center, ellipse cover,  #ffffff 0%, #f9f9f9 15%, #f9f9f9 100%);
+    background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#ffffff), color-stop(15%,#f9f9f9), color-stop(100%,#f9f9f9));
+    background: -webkit-radial-gradient(center, ellipse cover,  #ffffff 0%,#f9f9f9 15%,#f9f9f9 100%);
+    background: -o-radial-gradient(center, ellipse cover,  #ffffff 0%,#f9f9f9 15%,#f9f9f9 100%);
+    background: -ms-radial-gradient(center, ellipse cover,  #ffffff 0%,#f9f9f9 15%,#f9f9f9 100%);
+    background: radial-gradient(ellipse at center,  #ffffff 0%,#f9f9f9 15%,#f9f9f9 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#f9f9f9',GradientType=1 );
 }
 
+.hidetext .node {
+    text-indent:100%;
+    overflow:hidden;
+    max-width: 80px;
+}
+
+
 .node {
-    font-family: 'Arial';
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 11px;
+    line-height: 14px;
     cursor: pointer;
-    color: #ddddff;
-    background-color: #ccc;
-    padding: 2px 10px;
-    border: 1px solid #333;
-    max-width: 112px;
-    border-radius: 4px;
+    color: #ffffff;
+    background-color: #999999;
+    vertical-align: baseline;
+    padding: 2px 8px;
+    border: 1px solid #999;
+    /*max-width: 112px;*/
+    white-space: nowrap;
+    overflow: hidden;
+    border-radius: 3px;
 
     -webkit-user-select: none;  
     -moz-user-select: none;    
@@ -24,6 +42,7 @@
 .node:hover {
     z-index: 1000;
     color: #fff;
+    border-color: #aaa;
     font-size: 13px;
 }
 
