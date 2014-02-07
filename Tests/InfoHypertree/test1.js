@@ -346,8 +346,8 @@ function init() {
 
         onBeforePlotLine: function(adj){
             if (adj.nodeFrom.selected && adj.nodeTo.selected) {
-                adj.data.$color = "#aaa";
-                adj.data.$lineWidth = 3;
+                adj.data.$color = "#3f97d4";
+                adj.data.$lineWidth = 2;
             }
             else {
                 delete adj.data.$color;

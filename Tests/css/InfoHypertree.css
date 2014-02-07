@@ -42,11 +42,12 @@
 .node:hover {
     z-index: 1000;
     color: #fff;
-    border-color: #aaa;
     font-size: 13px;
 }
 
 .node.selected {
     font-weight: bold;
     background-color: #000000;
+    border-color: #3f97d4;
+    border-width: 2px;;
 }
